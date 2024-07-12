@@ -28,11 +28,15 @@ defmodule Servy.Handler do
 
   @pages_path Path.expand("../../pages", __DIR__)
 
-  def route(%{ method: "GET", path: "/bears/new" } = conv) do
+  def route(%{ method: "POST", path: "/bears/new" } = conv) do
     @pages_path
     |> Path.join("form.html")
     |> File.read
     |> handle_file(conv)
+  end
+
+  def route(%{ method: "POST", path: "/bears" } = conv) do
+    %Conv{ conv| status: 200, resp_body: "Created a #{conv.params["type"]} bear named #{conv.params["name"]}"}
   end
 
   def route(%{ method: "GET", path: "/bears/"<>id } = conv) do
@@ -74,10 +78,12 @@ defmodule Servy.Handler do
 end
 
 request = """
-GET /bears/new HTTP/1.0
+POST /bears/new HTTP/1.0
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
+
+name=baloo&type=polar
 """
 
 Servy.Handler.handle(request)
