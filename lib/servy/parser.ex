@@ -17,7 +17,12 @@ defmodule Servy.Parser do
 
   end
 
-
+  def parse_headers(header_lines) do
+    Enum.reduce(header_lines, %{}, fn(line, headers_so_far) ->
+      [key, value] = String.split(line, ": ")
+      Map.put(headers_so_far, key, value)
+    end)
+  end
 
   def parse_headers([head | tail], headers) do
     [key, value] = String.split(head, ": ")
