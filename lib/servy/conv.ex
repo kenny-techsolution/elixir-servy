@@ -1,5 +1,5 @@
 defmodule Servy.Conv do
-  defstruct method: "", path: "", resp_body: "", headers: %{}, status: nil, params: %{}
+  defstruct method: "", path: "", resp_body: "", headers: %{}, status: nil, params: %{}, resp_content_type: "text/html"
 
   def full_status(conv) do
     "#{conv.status} #{status_reason(conv.status)}"
