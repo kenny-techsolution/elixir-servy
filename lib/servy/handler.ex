@@ -37,6 +37,13 @@ defmodule Servy.Handler do
     render(conv, "sensors.eex", snapshots: snapshots, location: where_is_big_foot)
   end
 
+  def route(%Conv{method: "POST", path: "/pledges"} = conv) do
+    Servy.PledgeController.create(conv, conv.params)
+  end
+
+  def route(%Conv{method: "GET", path: "/pledges"} = conv) do
+    Servy.PledgeController.index(conv)
+  end
 
   def route(%Conv{ method: "GET", path: "/hibernate/" <> time } = conv) do
     time |> String.to_integer |> :timer.sleep
