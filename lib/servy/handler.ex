@@ -2,13 +2,18 @@ defmodule Servy.Handler do
 
   @moduledoc "Handles HTTP requests."
 
+  alias Servy.VideoCam
   alias Servy.Conv
   alias Servy.BearController
+  alias Servy.Fetcher
+  alias Servy.Tracker
 
   @pages_path Path.expand("../../pages", __DIR__)
 
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1]
   import Servy.Parser, only: [parse: 1]
+  import Servy.View, only: [render: 3]
+
 
   @doc "Transforms the request into a response."
   def handle(request) do
@@ -19,6 +24,23 @@ defmodule Servy.Handler do
     |> route
     |> track
     |> format_response
+  end
+
+  def route(%Conv{ method: "GET", path: "/sensors" <> time } = conv) do
+    task = Task.async(fn-> Tracker.get_location("bigfoot") end)
+
+    snapshots = ["cam-1", "cam-2", "cam-3"]
+    |> Enum.map(&Task.async(fn->VideoCam.getSnapshot(&1) end))
+    |> Enum.map(&Task.await/1)
+
+    where_is_big_foot = Task.await(task)
+    render(conv, "sensors.eex", snapshots: snapshots, location: where_is_big_foot)
+  end
+
+
+  def route(%Conv{ method: "GET", path: "/hibernate/" <> time } = conv) do
+    time |> String.to_integer |> :timer.sleep
+    %{ conv | status: 200, resp_body: "awake!" }
   end
 
   def route(%Conv{ method: "GET", path: "/wildthings" } = conv) do
